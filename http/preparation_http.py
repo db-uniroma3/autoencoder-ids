@@ -119,7 +119,6 @@ def label_detected_attacks(darktrace_ai_analyst, darktrace_raw_csv_path, output_
     # Salva il DataFrame aggiornato come CSV
     darktrace_raw.to_csv(output_csv_path, index=False)
 
-    label_simulated_attacks("train_http_raw.json", 'train_http_raw.csv')
 
 
 
