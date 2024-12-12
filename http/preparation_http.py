@@ -77,32 +77,32 @@ def calculate_sha256(data):
     sha256_hash = hashlib.sha256(data).hexdigest()
     return sha256_hash
 
-def find_with_dest_ip(timestamp_start, timestamp_end, source_ip, dest_ip, darktrace_row):
-    for _, row_record in darktrace_row.iterrows():
-        if ((row_record['@timestamp'] >= timestamp_start and
-             row_record['@timestamp'] <= timestamp_end) and
-            row_record['source_ip'] == calculate_sha256(source_ip) and
-            row_record['dest_ip'] == calculate_sha256(dest_ip)):
-            row_record['label'] = 1
+def find_with_dest_ip(timestamp_start, timestamp_end, source_ip, dest_ip, darktrace_raw):
+    for _, raw_record in darktrace_raw.iterrows():
+        if ((raw_record['@timestamp'] >= timestamp_start and
+             raw_record['@timestamp'] <= timestamp_end) and
+            raw_record['source_ip'] == calculate_sha256(source_ip) and
+            raw_record['dest_ip'] == calculate_sha256(dest_ip)):
+            raw_record['label'] = 1
         else:
-            if 'label' not in row_record or pd.isna(row_record['label']):
-                row_record['label'] = 0
+            if 'label' not in raw_record or pd.isna(raw_record['label']):
+                raw_record['label'] = 0
 
-def find_without_dest_ip(timestamp_start, timestamp_end, source_ip, darktrace_row):
-    for _, row_record in darktrace_row.iterrows():
-        if ((row_record['@timestamp'] >= timestamp_start and
-             row_record['@timestamp'] <= timestamp_end) and
-            row_record['source_ip'] == calculate_sha256(source_ip)):
-            row_record['label'] = 1
+def find_without_dest_ip(timestamp_start, timestamp_end, source_ip, darktrace_raw):
+    for _, raw_record in darktrace_raw.iterrows():
+        if ((raw_record['@timestamp'] >= timestamp_start and
+             raw_record['@timestamp'] <= timestamp_end) and
+            raw_record['source_ip'] == calculate_sha256(source_ip)):
+            raw_record['label'] = 1
         else:
-            if 'label' not in row_record or pd.isna(row_record['label']):
-                row_record['label'] = 0
+            if 'label' not in raw_record or pd.isna(raw_record['label']):
+                raw_record['label'] = 0
 
-def label_detected_attacks(darktrace_ai_analyst, darktrace_row_csv_path, output_csv_path):
+def label_detected_attacks(darktrace_ai_analyst, darktrace_raw_csv_path, output_csv_path):
 
     darktrace_ai_analyst=add_ip_to_record(darktrace_ai_analyst)
     # Carica il dataset CSV come DataFrame
-    darktrace_row = pd.read_csv(darktrace_row_csv_path)
+    darktrace_raw = pd.read_csv(darktrace_raw_csv_path)
 
     for record in darktrace_ai_analyst:
         source_ip = record["related"]["ip"][0]
@@ -111,37 +111,37 @@ def label_detected_attacks(darktrace_ai_analyst, darktrace_row_csv_path, output_
 
         if len(record["related"]["ip"]) > 1:
             for dest_ip in record["related"]["ip"][1:]:
-                find_with_dest_ip(timestamp_start, timestamp_end, source_ip, dest_ip, darktrace_row)
+                find_with_dest_ip(timestamp_start, timestamp_end, source_ip, dest_ip, darktrace_raw)
         else:
-            find_without_dest_ip(timestamp_start, timestamp_end, source_ip, darktrace_row)
+            find_without_dest_ip(timestamp_start, timestamp_end, source_ip, darktrace_raw)
 
 
     # Salva il DataFrame aggiornato come CSV
-    darktrace_row.to_csv(output_csv_path, index=False)
+    darktrace_raw.to_csv(output_csv_path, index=False)
 
-    label_simulated_attacks("train_http_row.json", 'train_http_row.csv')
+    label_simulated_attacks("train_http_raw.json", 'train_http_raw.csv')
 
 
 
 def main():
-    train_row_json = "train_http_row.json"
+    train_raw_json = "train_http_raw.json"
     train_ai_json= "train_http_ai.json"
-    test_row_json = "test_http_row.json"
+    test_raw_json = "test_http_raw.json"
     test_ai_json = "test_http_ai.json"
 
-    train_row_csv = "train_http_row.csv"
-    test_row_csv = "test_http_row.csv"
+    train_raw_csv = "train_http_raw.csv"
+    test_raw_csv = "test_http_raw.csv"
 
     print("Etichettamento degli attacchi simulati e rilevati da Darktrace AI Analyst in corso...")
 
-    label_simulated_attacks(train_row_json, train_row_csv) #etichetta gli attacchi simulati
-    label_simulated_attacks(test_row_json, test_row_csv)#etichetta gli attacchi simulati
+    label_simulated_attacks(train_raw_json, train_raw_csv) #etichetta gli attacchi simulati
+    label_simulated_attacks(test_raw_json, test_raw_csv)#etichetta gli attacchi simulati
     
     #darktrace_ai_analyst=read_json_file(train_ai_json)
-    #label_detected_attacks(darktrace_ai_analyst, train_row_csv, train_row_csv)
+    #label_detected_attacks(darktrace_ai_analyst, train_raw_csv, train_raw_csv)
 
     darktrace_ai_analyst=read_json_file(test_ai_json)
-    label_detected_attacks(darktrace_ai_analyst, test_row_csv, test_row_csv)
+    label_detected_attacks(darktrace_ai_analyst, test_raw_csv, test_raw_csv)
 
     print("Etichettamento completato.")
 

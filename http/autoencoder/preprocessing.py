@@ -102,8 +102,8 @@ def save_train(df, output_prefix):
 # Main per eseguire il preprocessing
 def main():
     # Percorsi dei file di input
-    train_file_path = 'train_http_row.csv'
-    test_file_path = 'test_http_row.csv'
+    train_file_path = 'train_http_raw.csv'
+    test_file_path = 'test_http_raw.csv'
 
     # Lettura dei dataset
     print("Caricamento dei dataset...")
