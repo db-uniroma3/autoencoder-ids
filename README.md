@@ -56,19 +56,18 @@ I dataset di train e test vanno preprocessati insieme:
 autoencoder-ids preprocess --http --train resources/prepared/http/train_http_raw.csv --test resources/prepared/http/test_http_raw.csv --output resources/preprocessed/http/
 ```
 
-Questo produrrà in uscita
+Questo produrrà in uscita (nella cartella `resources/preprocessed/http`) i dataset pronti per l'addestramento e il test . 
 
 ### Addestramento del Modello
 
-I dati prima di essere preprocessati, devono essere trasformati in formato csv. Per farlo esegui il comando:
-
+Ora è possibile eseguire l'addastramento, salvando il relativo modello, con il seguente comando: 
 ```bash
 autoencoder-ids train --dataset resources/preprocessed/http/feature_train.csv --save-model resources/models/http.keras
 ```
 
 ### Testare il Modello
 
-I dati prima di essere preprocessati, devono essere trasformati in formato csv. Per farlo esegui il comando:
+Una volta completato l'addestramento, è possibile verificare le prestazioni del modello sul testset, con il seguente comando:
 
 ```bash
 autoencoder-ids test --feature-dataset resources/preprocessed/http/feature_test.csv --label-dataset resources/preprocessed/http/label_test.csv --load-model resources/models/http.keras --figure-path resources/figures/
